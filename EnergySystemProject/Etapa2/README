@@ -1,0 +1,101 @@
+Becheanu Daniela Elena
+
+* choice package - contine clasele si interfata cu ajutorul carora se va 
+	implementa Strategy (inclusiv un Factory prin care se creeaza strategia
+	in functie de tipul acesteia)
+* input package - contine clasele cu ajutorul carora se va face citirea din
+	fisierul de intrare si o interfata (Player) pe care o implementeaza
+	DistributorInp, ConsumerInp si ProducerInp
+	* ConsumerInp - prin intermediul acestei clase se creeaza un consumator,
+		avand implementata metoda pay, prin intermediul careia sa va face
+		plata contractului
+	* DistributorInp - se creeaza un distribuitor la citire; metoda pay 
+		realizeaza plata unui distribuitor; mai intai se verifica daca acesta
+		este bankrupt, iar, in caz afirmativ, tuturor consumatorilor care au
+		contract cu acesta li se anuleaza datoria; altfel, se realizeaza plata
+	* ProducerInp - se creeaza u producator la citire
+	* cele trei clase mentionate anterior implementeaza interfata PlayerInp,
+		aceasta a fost creata pentru a ajuta la genericitatea deisgn-ului
+		Factory, deoarece se va putea da ca parametru la crearea unui PlayerOut
+		un obiect de tipul PlayerInp (nu mai e necesara diferentierea dintre
+		consumator, distribuitor si producator)
+* output package - contine clasele cu ajutorul carora se va forma fisierul de
+	iesire, interfata PlayerOut pe care o implementeaza DistributorOut,
+	ConsumerOut si Producer Out, cu ajutorul careia se va folosi design
+	Pattern-ul Factory
+* utils package - contine clase intermediare care implementeaza metode pentru
+	simularea sistemului energetic
+
+# Despre cod
+	* se realizeaza citirea din fisierul de intrare cu ajutorul formatului
+		JSON, dupa care incepe simularea efectiva (prin apelul game.start);
+		astfel, flow-ul pentru prima runda este rumatorul:
+		* se seteaza campul renewableEnergy din clasa ProducerInp, folosit
+			pentru sortarea acestora cand tipul strategiei este GREEN
+		* se aleg producatorii initiali pentru toti distribuitorii in functie
+			de strategia aleasa
+		* se calculeaza costul de productie si pretul contractului fiecarui
+			distribuitor
+		* consumatorilor le este adaugat salariul al venitul intial, acestia
+			aleg contractele si le platesc (li se decrementeaza valabilitatea
+			contractului)
+		* distribuitorii isi platesc cheltuielile
+		* din lista de contracte a fiecarui distribuitor sunt sterse
+			contractele incheiate
+
+		iar flow-ul pentru lunile urmatoare este:
+		* se realizeaza monthly update-urile referitoare la consumatori si
+			distribuitori
+		* se calculeaza noile preturi ale fiecarui distribuitor
+		* se adauga venitul lunar la salariul fiecarui consumator
+		* apoi, consumatorii care nu sunt bankrupt si carora le-a expirat
+			contractul isi aleg un alt contract
+		* cum fiecare distribuitor detine o lista cu toate contractele actuale,
+			dupa ce consumatorii isi aleg contractele, cele care raman cu
+			valabilitate 0 sunt sterse din listele acestora
+		* se realizeaza plata fiecarui consumator in parte si se decrementeaza
+			valabilitatea contractului
+		* fiecare distribuitor isi plateste cheltuielile din luna actuala
+		* se realizeaza monthly update-urile producatorilor, notificandu-se
+			distribuitorii care cumpara energie de la producatorii care fac
+			update
+		* distributitorilor notificati trebuie sa li se goleasca lista de
+			producatori curenta, pentru a-si alege noi producatori; de
+			asemenea, din lista producatorilor se sterg distribuitorii; dupa
+			aceea, distribuitorii isi aleg noii producatori in functie de
+			strategia pe care o au
+		* se calculeaza noul cost de productie al fiecarui distribuitor
+		* pentru fiecare producator, i se asigneaza monthlyStats-ului lunii
+			respective id-urile distribuitorilor care au ramas in lista
+			acestuia
+	* scrierea in fisier se realizeaza tot cu ajutorul formatului JSON, in
+		metoda gameEnd din clasa End, unde sunt create instantele obiectelor de
+		output, folosind Factory
+	* OOP Design patterns
+		* Factory:
+			* folosit pentru generarea de clase inrudite (ConsumerOut,
+				DistributorOut si ProducerOut)
+			* folosit pentru crearea strategiei fiecarui distribuitor si 
+				formarea listei sale de producatori (getProducerList), in
+				functie de tipul acesteia; strategia consta in sortarea listei
+				initiale de producatori, in functie de criteriile cerute de
+				fiecare strategie, dupa care distribuitorului respectiv i se
+				asigneaza numarul necesar de producatori (pentru cantitatea de
+				energie ceruta)
+		* Singleton:
+			* folosit pentru clasele End si Game, deoarece nu este
+				nevoie decat de o instanta a acestora
+			* este folosit si in corelatie cu clasele  folosite pentru Factory
+				(OutFactory si ChoiceStrategyFactory), deoarece nu se doreste
+				decat un obiect pentru instantierea unui Factory, prin care sa
+				se realizeze crearea obiectelor ce implementeaza PlayerOut,
+				respectiv ChoiceStrategy
+		* Observer:
+			* rolul de Observers il au distribuitorii, iar pe cel de Observable
+				il au producatorii
+			* in luna in care un producator isi face update, distribuitorii din
+				lista sa de Observers trebuie notificati (notificarea sa face
+				prin metoda setChanged a producatorului, acestora setandu-li-se
+				campul changed cu 1); astfel, distribuitorii care au acest camp
+				egal cu 1 vor trebui ca, luna urmatoare, sa isi aleaga din nou
+				producatorii

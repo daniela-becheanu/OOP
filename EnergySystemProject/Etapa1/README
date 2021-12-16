@@ -1,0 +1,57 @@
+Becheanu Daniela Elena
+
+* input package - contine clasele cu ajutorul carora se va face citirea din
+	fisierul de intrare si o interfata (Player) pe care o implementeaza
+	DistributorInp si ConsumerInp
+	* ConsumerInp - prin intermediul acestei clase se creeaza un consumator,
+		avand implementata metoda pay, prin intermediul careia sa va face
+		plata contractului: plata se realizeaza daca acestea nu este bankrupt,
+		urmand sa se verifice daca are sau nu are deja o datorie; daca nu mai
+		are, atunci se verifica daca isi permite rata curenta si, daca poate, i
+		se scade rata din salariu, iar daca nu poate, i se seteaza campul
+		contractDebt (se retine contractul la care are datorie); in cazul in
+		care mai are deja o datorie, se verifica daca o poate plati pe aceasta
+		impreuna cu rata curenta, iar in caz negativ, se declara bankrupt
+	* DistributorInpt - se creeaza un distribuitor la citire; metoda pay 
+		realizeaza plata unui distribuitor; mai intai se verifica daca acesta
+		este bankrupt, iar, in caz afirmativ, tuturor consumatorilor care au
+		contract cu acesta li se anuleaza datoria; altfel, se realizeaza plata
+	* cele doua clase mentionate anterior implementeaza interfata PlayerInp,
+		avand metoda comuna pay; aceasta a fost creata pentru a ajuta la
+		genericitatea deisgn-ului Factory, deoarece se va putea da ca parametru
+		la crearea unui PlayerOut un obiect de tipul PlayerIn (nu mai e necesara
+		diferentierea dintre consumator si distribuitor)
+* output package - contine clasele cu ajutorul carora se va forma fisierul de
+	iesire, interfata PlayerOut pe care o implementeaza DistributorOut si
+	ConsumerOut, cu ajutorul careia se va folosi design pattern-ul Factory
+* utils package - contine clase intermediare care implementeaza metode pentru
+	simularea sistemului energetic
+
+# Despre cod
+	* se realizeaza citirea din fisierul de intrare cu ajutorul formatului
+		JSON, dupa care incepe simularea efectiva (prin apelul game.start);
+		astfel, se ruleaza fiecare runda:
+		* prima data se realizeaza monthly update-urile si se calculeaza
+			preturile contractelor fiecarui distribuitor
+		* apoi consumatorilor le este adunat la buget venitul lunar
+		* dupa aceea, consumatorii care nu sunt bankrupt si, ori nu detin
+			niciun contract (sunt la inceputul jocului), ori cel precedent le-a
+			expirat, isi pot alege un contract (pe cel mai avantajos)
+		* cum fiecare distribuitor detine o lista cu toate contractele actuale,
+			dupa ce consumatorii isi aleg contractele, cele care raman cu
+			valabilitate 0 sunt sterse din listele acestora
+		* se realizeaza plata fiecarui consumator in parte si se decrementeaza
+			valabilitatea contractului
+		* se realizeaza plata fiecarui distribuitor, urmand ca la finalul lunii
+			sa se stearga din listele distribuitorilor contractele ale caror
+			consumatori au dat faliment
+	* scrierea in fisier se realizeaza tot cu ajutorul formatului JSON, in
+		metoda gameEnd din clasa End, unde sunt create instantele obiectelor de
+		output, folosind Factory
+	* OOP Design patterns
+		* Factory - folosit pentru generarea de clase inrudite (ConsumerOut si
+			DistributorOut)
+		* Singleton - folosit pentru clasele End si Game, deoarece nu este
+			nevoie decat de o instanta; este folosit si in corelatie cu clasa
+			OutFactory, deoarece nu se doreste decat un obiect OutFactory, prin
+			care se realizeaza crearea obiectelor ce implementeaza PlayerOut
